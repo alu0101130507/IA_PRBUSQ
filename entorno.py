@@ -13,10 +13,17 @@ pygame.display.set_icon(icon)
 play = pygame.image.load("./play.png")
 playX = 0.03 * screen_width
 playY = 0.2 * screen_height
+font = pygame.font.Font(pygame.font.get_default_font(), 16)
+textEsp = font.render("\"Espacio\"", True, (0, 0, 0))
+textEspRect = textEsp.get_rect()
+textEspRect.center = (0.045 * screen_width, 0.28 * screen_height)
 
 refresh = pygame.image.load("./refresh.png")
 refreshX = 0.03 * screen_width
 refreshY = 0.4 * screen_height
+textR = font.render("\"R\"", True, (0, 0, 0))
+textRRect = textR.get_rect()
+textRRect.center = (0.045 * screen_width, 0.48 * screen_height)
 
 class Cell:
     
@@ -121,12 +128,14 @@ while running:
         else:
           play = pygame.image.load("./play.png")
           playing = False
-      if event.key == pygame.K_BACKSPACE:
+      if event.key == pygame.K_r:
         tabla.killAll()
 
 
   screen.fill((80, 80, 80))
   screen.blit(play, (playX, playY))
+  screen.blit(textEsp, textEspRect)
+  screen.blit(textR, textRRect)
   screen.blit(refresh, (refreshX, refreshY))
   tabla.printBoard()
   if playing == True:
