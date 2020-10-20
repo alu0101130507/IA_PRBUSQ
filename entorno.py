@@ -1,13 +1,33 @@
 import pygame
+import random
+from datetime import datetime
+
+print("\n¿De qué tamaño desea la tabla (M x N)?\nM: ")
+tablaM = int(input())
+print("N: ")
+tablaN = int(input())
+print("¿Desea que la posición de los obstáculos sea manual (1) o aleatoria (2)?")
+done = False
+while done == False:
+  obstMode = int(input())
+  if obstMode == 1:
+    manual = True
+    done = True
+  elif obstMode == 2:
+    manual = False
+    done = True
+  else: 
+    print("Valor introducido no válido. Introduzca 1 o 2.")
 
 pygame.init()
+random.seed(datetime.now())
 
 screen_height = 1080
 screen_width = 1920
 screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
 icon = pygame.image.load("./hexagon.png")
 
-pygame.display.set_caption("Life")
+pygame.display.set_caption("Búsqueda")
 pygame.display.set_icon(icon)
 
 play = pygame.image.load("./play.png")
@@ -24,6 +44,13 @@ refreshY = 0.4 * screen_height
 textR = font.render("\"R\"", True, (0, 0, 0))
 textRRect = textR.get_rect()
 textRRect.center = (0.045 * screen_width, 0.48 * screen_height)
+
+obstacle = pygame.image.load("./barrera.png")
+obstacleX = 0.03 * screen_width
+obstacleY = 0.6 * screen_height
+textObs = font.render("\"Click derecho\"", True, (0, 0, 0))
+textObsRect = textObs.get_rect()
+textObsRect.center = (0.045 * screen_width, 0.68 * screen_height)
 
 class Cell:
     
@@ -63,13 +90,13 @@ class Board:
     self.rows = rows_ + 2
     self.cols = cols_ + 2
     self.turn = 0
-    self.sprite = pygame.Rect(0.1 * screen_width, 0.1 * screen_height, 0.9 * screen_width - (0.1 * screen_width), 0.9 * screen_height - (0.1 * screen_height))
-
+    self.sprite = pygame.Rect(0.1 * screen_width, 0.1 * screen_height, self.cols*17, self.rows*17)
     self.mesh = []
+
     for i in range(self.rows):
       row = []
       for j in range(self.cols):
-        rect = pygame.Rect(0.1 * screen_width + j*(10 + 2), 0.1 * screen_height + i*(10 + 2), 10, 10)
+        rect = pygame.Rect(0.1 * screen_width + j*(15 + 2), 0.1 * screen_height + i*(15 + 2), 15, 15)
         row.append(Cell([i, j], 0, rect))
       self.mesh.append(row)
     
@@ -101,25 +128,34 @@ class Board:
       for j in range(self.cols):
         self.mesh[i][j].state = 0
 
+tabla = Board(tablaM, tablaN)
+if manual == False:
+  for i in range(1, int((tablaM * tablaN)/10)):
+    tabla.toggleCellState(random.randint(0, tablaM), random.randint(0, tablaN))
+
 running = True
 playing = False
-tabla = Board(70,126)
 
 while running:
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
       running = False
-    if event.type == pygame.MOUSEBUTTONDOWN:
-      pos = pygame.mouse.get_pos()
-      posList = list(pos)
-      posList[0] = pos[0] - 10
-      posList[1] = pos[1] - 10
-      if tabla.sprite.collidepoint(posList):
-        for i in range(1, tabla.rows - 1):
-          for j in range(1, tabla.cols - 1):
-            temp_sprite = tabla.mesh[i][j].sprite
-            if temp_sprite.collidepoint(posList):
-              tabla.toggleCellState(i, j)
+    if manual == True:
+      if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.button == 3:
+          pos = pygame.mouse.get_pos()
+          posList = list(pos)
+          posList[0] = pos[0] - 10
+          posList[1] = pos[1] - 10
+          if tabla.sprite.collidepoint(posList):
+            for i in range(1, tabla.rows - 1):
+              for j in range(1, tabla.cols - 1):
+                temp_sprite = tabla.mesh[i][j].sprite
+                if temp_sprite.collidepoint(posList):
+                  tabla.toggleCellState(i, j)
+        elif event.button == 1:
+          print("WIP!!!")
+
     if event.type == pygame.KEYDOWN:
       if event.key == pygame.K_SPACE:
         if (playing == False):
@@ -131,12 +167,13 @@ while running:
       if event.key == pygame.K_r:
         tabla.killAll()
 
-
   screen.fill((80, 80, 80))
   screen.blit(play, (playX, playY))
   screen.blit(textEsp, textEspRect)
-  screen.blit(textR, textRRect)
   screen.blit(refresh, (refreshX, refreshY))
+  screen.blit(textR, textRRect)
+  screen.blit(obstacle, (obstacleX, obstacleY))
+  screen.blit(textObs, textObsRect)
   tabla.printBoard()
   if playing == True:
     tabla.updateBoard()
