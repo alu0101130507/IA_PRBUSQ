@@ -2,7 +2,13 @@ import pygame
 import random
 from datetime import datetime
 
-print("\n¿De qué tamaño desea la tabla (M x N)?\nM: ")
+print(  "\nInstrucciones de uso:"
+        "\nPara añadir obstáculos (sólo en modo manual) haga click derecho en la celda deseada."
+        "\nPara marcar el inicio y final de la trayectoria haga click izquierdo."
+        "\nPara empezar la búsqueda pulse espacio."
+        "\nPara reiniciar el tablero pulse R."
+        "\n¿De qué tamaño desea la tabla (M x N)?" 
+        "Dependiendo del monitor que use habrá un máximo de celdas que se puedan visualizar\nM: ")
 tablaM = int(input())
 print("N: ")
 tablaN = int(input())
@@ -25,32 +31,10 @@ random.seed(datetime.now())
 screen_height = 1080
 screen_width = 1920
 screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
-icon = pygame.image.load("./hexagon.png")
 
+icon = pygame.image.load("./hexagon.png")
 pygame.display.set_caption("Búsqueda")
 pygame.display.set_icon(icon)
-
-play = pygame.image.load("./play.png")
-playX = 0.03 * screen_width
-playY = 0.2 * screen_height
-font = pygame.font.Font(pygame.font.get_default_font(), 16)
-textEsp = font.render("\"Espacio\"", True, (0, 0, 0))
-textEspRect = textEsp.get_rect()
-textEspRect.center = (0.045 * screen_width, 0.28 * screen_height)
-
-refresh = pygame.image.load("./refresh.png")
-refreshX = 0.03 * screen_width
-refreshY = 0.4 * screen_height
-textR = font.render("\"R\"", True, (0, 0, 0))
-textRRect = textR.get_rect()
-textRRect.center = (0.045 * screen_width, 0.48 * screen_height)
-
-obstacle = pygame.image.load("./barrera.png")
-obstacleX = 0.03 * screen_width
-obstacleY = 0.6 * screen_height
-textObs = font.render("\"Click derecho\"", True, (0, 0, 0))
-textObsRect = textObs.get_rect()
-textObsRect.center = (0.045 * screen_width, 0.68 * screen_height)
 
 class Cell:
     
@@ -94,13 +78,13 @@ class Board:
     self.rows = rows_ + 2
     self.cols = cols_ + 2
     self.turn = 0
-    self.sprite = pygame.Rect(0.1 * screen_width, 0.1 * screen_height, self.cols*17, self.rows*17)
+    self.sprite = pygame.Rect(0.05 * screen_width, 0.05 * screen_height, self.cols*17, self.rows*17)
     self.mesh = []
 
     for i in range(self.rows):
       row = []
       for j in range(self.cols):
-        rect = pygame.Rect(0.1 * screen_width + j*(15 + 2), 0.1 * screen_height + i*(15 + 2), 15, 15)
+        rect = pygame.Rect(0.05 * screen_width + j*(15 + 2), 0.05 * screen_height + i*(15 + 2), 15, 15)
         row.append(Cell([i, j], 0, rect))
       self.mesh.append(row)
     
@@ -146,8 +130,8 @@ while running:
     if event.type == pygame.MOUSEBUTTONDOWN:
       pos = pygame.mouse.get_pos()
       posList = list(pos)
-      posList[0] = pos[0] - 10
-      posList[1] = pos[1] - 10
+      posList[0] = pos[0] - 15
+      posList[1] = pos[1] - 15
       if tabla.sprite.collidepoint(posList):
         for i in range(1, tabla.rows - 1):
           for j in range(1, tabla.cols - 1):
@@ -161,10 +145,8 @@ while running:
     if event.type == pygame.KEYDOWN:
       if event.key == pygame.K_SPACE:
         if (playing == False):
-          play = pygame.image.load("./pause.png")
           playing = True
         else:
-          play = pygame.image.load("./play.png")
           playing = False
       if event.key == pygame.K_r:
         if manual == False:
@@ -174,12 +156,6 @@ while running:
           tabla.killAll()
 
   screen.fill((80, 80, 80))
-  screen.blit(play, (playX, playY))
-  screen.blit(textEsp, textEspRect)
-  screen.blit(refresh, (refreshX, refreshY))
-  screen.blit(textR, textRRect)
-  screen.blit(obstacle, (obstacleX, obstacleY))
-  screen.blit(textObs, textObsRect)
   tabla.printBoard()
   if playing == True:
     tabla.updateBoard()
