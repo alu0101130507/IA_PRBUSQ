@@ -79,10 +79,14 @@ class Cell:
       self.state = 1
 
   def draw(self):
-    if self.state == 1:
-      pygame.draw.rect(screen, (255, 255, 255), self.sprite)
-    else:
+    if self.state == 0:
       pygame.draw.rect(screen, (0, 0, 0), self.sprite)
+    elif self.state == 1:
+      pygame.draw.rect(screen, (255, 255, 255), self.sprite)
+    elif self.state == 2:
+      pygame.draw.rect(screen, (102, 178, 255), self.sprite)
+    elif self.state == 3:
+      pygame.draw.rect(screen, (255, 178, 102), self.sprite)
 
 class Board:
   
@@ -115,23 +119,22 @@ class Board:
         self.mesh[i][j].update()
     self.turn += 1
 
-  def toggleCellState(self, posX, posY):
+  def setCellState(self, state, posX, posY):
     givenCell = self.mesh[posX + 1][posY + 1]
-
-    if givenCell.state == 1:
-      givenCell.state = 0
-    else:
-      givenCell.state = 1
+    givenCell.state = state
 
   def killAll(self):
     for i in range(self.rows):
       for j in range(self.cols):
         self.mesh[i][j].state = 0
+  
+  def randomGen(self):
+    for i in range(1, int((tablaM * tablaN)/10)):
+      tabla.setCellState(1, random.randint(0, tablaM), random.randint(0, tablaN))
 
 tabla = Board(tablaM, tablaN)
 if manual == False:
-  for i in range(1, int((tablaM * tablaN)/10)):
-    tabla.toggleCellState(random.randint(0, tablaM), random.randint(0, tablaN))
+  tabla.randomGen()
 
 running = True
 playing = False
@@ -140,22 +143,21 @@ while running:
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
       running = False
-    if manual == True:
-      if event.type == pygame.MOUSEBUTTONDOWN:
-        if event.button == 3:
-          pos = pygame.mouse.get_pos()
-          posList = list(pos)
-          posList[0] = pos[0] - 10
-          posList[1] = pos[1] - 10
-          if tabla.sprite.collidepoint(posList):
-            for i in range(1, tabla.rows - 1):
-              for j in range(1, tabla.cols - 1):
-                temp_sprite = tabla.mesh[i][j].sprite
-                if temp_sprite.collidepoint(posList):
-                  tabla.toggleCellState(i, j)
-        elif event.button == 1:
-          print("WIP!!!")
-
+    if event.type == pygame.MOUSEBUTTONDOWN:
+      pos = pygame.mouse.get_pos()
+      posList = list(pos)
+      posList[0] = pos[0] - 10
+      posList[1] = pos[1] - 10
+      if tabla.sprite.collidepoint(posList):
+        for i in range(1, tabla.rows - 1):
+          for j in range(1, tabla.cols - 1):
+            temp_sprite = tabla.mesh[i][j].sprite
+            if temp_sprite.collidepoint(posList):
+              if event.button == 3:
+                if manual == True:
+                  tabla.setCellState(1, i, j)
+              elif event.button == 1:
+                tabla.setCellState(2, i, j)
     if event.type == pygame.KEYDOWN:
       if event.key == pygame.K_SPACE:
         if (playing == False):
@@ -165,7 +167,11 @@ while running:
           play = pygame.image.load("./play.png")
           playing = False
       if event.key == pygame.K_r:
-        tabla.killAll()
+        if manual == False:
+          tabla.killAll()
+          tabla.randomGen()
+        else:
+          tabla.killAll()
 
   screen.fill((80, 80, 80))
   screen.blit(play, (playX, playY))
