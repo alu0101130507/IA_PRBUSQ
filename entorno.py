@@ -117,15 +117,15 @@ class Board:
     givenCell.state = 2
     self.ends.append(givenCell)
 
-
   def killAll(self):
     for i in range(self.rows):
       for j in range(self.cols):
         self.mesh[i][j].state = 0
+    self.ends.clear()
   
   def randomGen(self):
     for i in range(1, int((tablaM * tablaN)/10)):
-      tabla.setCellState(1, random.randint(0, tablaM), random.randint(0, tablaN))
+      tabla.mesh[random.randint(0,tablaM)][random.randint(0,tablaN)].state = 1
 
 tabla = Board(tablaM, tablaN)
 if manual == False:
@@ -138,7 +138,7 @@ while running:
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
       running = False
-    if event.type == pygame.MOUSEBUTTONDOWN:
+    if event.type == pygame.MOUSEBUTTONDOWN and playing == False:
       pos = pygame.mouse.get_pos()
       posList = list(pos)
       posList[0] = pos[0] - 15
@@ -148,10 +148,9 @@ while running:
           for j in range(1, tabla.cols - 1):
             temp_sprite = tabla.mesh[i][j].sprite
             if temp_sprite.collidepoint(posList):
-              if event.button == 3:
-                if manual == True:
-                  tabla.toggleCellState(i,j)
-              elif event.button == 1:
+              if event.button == 3 and manual == True:
+                tabla.toggleCellState(i,j)
+              elif event.button == 1 and len(tabla.ends) < 2:
                 tabla.setEnds(i, j)
     if event.type == pygame.KEYDOWN:
       if event.key == pygame.K_SPACE:
