@@ -5,9 +5,9 @@ from datetime import datetime
 print(  "\nInstrucciones de uso:"
         "\nPara añadir obstáculos (sólo en modo manual) haga click derecho en la celda deseada."
         "\nPara marcar el inicio y final de la trayectoria haga click izquierdo."
-        "\nPara empezar la búsqueda pulse espacio."
+        "\nPara empezar la búsqueda o pausarla pulse espacio."
         "\nPara reiniciar el tablero pulse R."
-        "\n¿De qué tamaño desea la tabla (M x N)?" 
+        "\n¿De qué tamaño desea la tabla (M x N)? " 
         "Dependiendo del monitor que use habrá un máximo de celdas que se puedan visualizar\nM: ")
 tablaM = int(input())
 print("N: ")
@@ -80,6 +80,7 @@ class Board:
     self.turn = 0
     self.sprite = pygame.Rect(0.05 * screen_width, 0.05 * screen_height, self.cols*17, self.rows*17)
     self.mesh = []
+    self.ends = []
 
     for i in range(self.rows):
       row = []
@@ -103,9 +104,19 @@ class Board:
         self.mesh[i][j].update()
     self.turn += 1
 
-  def setCellState(self, state, posX, posY):
+  def toggleCellState(self, posX, posY):
     givenCell = self.mesh[posX + 1][posY + 1]
-    givenCell.state = state
+
+    if givenCell.state == 1:
+      givenCell.state = 0
+    else:
+      givenCell.state = 1
+
+  def setEnds(self, posX, posY):
+    givenCell = self.mesh[posX + 1][posY + 1]
+    givenCell.state = 2
+    self.ends.append(givenCell)
+
 
   def killAll(self):
     for i in range(self.rows):
@@ -139,9 +150,9 @@ while running:
             if temp_sprite.collidepoint(posList):
               if event.button == 3:
                 if manual == True:
-                  tabla.setCellState(1, i, j)
+                  tabla.toggleCellState(i,j)
               elif event.button == 1:
-                tabla.setCellState(2, i, j)
+                tabla.setEnds(i, j)
     if event.type == pygame.KEYDOWN:
       if event.key == pygame.K_SPACE:
         if (playing == False):
